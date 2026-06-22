@@ -1,22 +1,22 @@
-import uuid
 from django.db import models
+from .encryption import EncryptedField
 
 class Patient(models.Model):
-    """
-    Modelo para almacenar los datos de filiación del paciente.
-    Los nombres y apellidos se mantienen en texto plano para permitir filtros.
-    Campos como DNI, teléfono y fecha de nacimiento quedan preparados 
-    para el cifrado obligatorio AES-256-GCM de la Semana 3.
-    """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    nombres = models.CharField(max_length=150)
-    apellidos = models.CharField(max_length=150)
+    # Datos NO sensibles (se guardan normales)
+    nombre = models.CharField(max_length=100)
+    apellido = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
     
-    # NOTA: Estos campos se manejarán como texto plano temporalmente en la Semana 2
-    # para las migraciones iniciales, y se transformarán en EncryptedField en la Semana 3.
-    dni = models.CharField(max_length=50, unique=True)
-    telefono = models.CharField(max_length=50)
-    fecha_nacimiento = models.DateField()
+    # Datos SENSIBLES (Cifrados con nuestro motor)
+    # Definimos las columnas en la base de datos para guardar el texto cifrado
+    dni_cifrado = models.TextField()
+    telefono_cifrado = models.TextField()
+    fecha_nacimiento_cifrada = models.TextField()
+
+    # Aplicamos la "magia" del EncryptedField para usarlos fácilmente en el código
+    dni = EncryptedField('dni_cifrado')
+    telefono = EncryptedField('telefono_cifrado')
+    fecha_nacimiento = EncryptedField('fecha_nacimiento_cifrada')
 
     def __str__(self):
-        return f"{self.apellidos}, {self.nombres}"
+        return f"{self.apellido}, {self.nombre}"
