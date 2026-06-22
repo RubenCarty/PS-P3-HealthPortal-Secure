@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Seguridad 2FA - UQ HealthShield</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f7f6;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .login-box {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 320px;
+        text-align: center;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        margin: 15px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        text-align: center;
+        font-size: 1.5em;
+        letter-spacing: 5px;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      .alert {
+        color: #721c24;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        font-size: 0.9em;
+      }
+      .qr-container img {
+        max-width: 200px;
+        margin: 15px 0;
+        border: 2px solid #ddd;
+        padding: 5px;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-box">
+      <h2>Doble Factor</h2>
+
+      {% if qr_code %}
+      <p style="font-size: 0.9em; color: #555">
+        Escanea este código con tu app (Authy o Google Authenticator):
+      </p>
+      <div class="qr-container">
+        <img src="{{ qr_code }}" alt="Código QR 2FA" />
+      </div>
+      {% else %}
+      <p style="font-size: 0.9em; color: #555">
+        Ingresa el código de 6 dígitos de tu aplicación móvil.
+      </p>
+      {% endif %} {% if messages %} {% for message in messages %}
+      <div class="alert">{{ message }}</div>
+      {% endfor %} {% endif %}
+
+      <form method="POST">
+        {% csrf_token %}
+        <input
+          type="text"
+          name="totp_token"
+          placeholder="000000"
+          maxlength="6"
+          required
+          autocomplete="off"
+        />
+        <button type="submit">Verificar Identidad</button>
+      </form>
+    </div>
+  </body>
+</html>

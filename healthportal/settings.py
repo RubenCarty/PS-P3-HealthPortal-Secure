@@ -37,6 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Mis aplicaciones - UQ HealthShield
+    'accounts',
+    'patients',
+    'records',
+    'consent',
+
+    # Seguridad
+    'axes',
 ]
 
 MIDDLEWARE = [
@@ -47,6 +56,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # Middleware de seguridad para rate limiting
+    'axes.middleware.AxesMiddleware',
+    
+    # Middleware de Content Security Policy (Punto 5)
+    'csp.middleware.CSPMiddleware',
 ]
 
 ROOT_URLCONF = 'healthportal.urls'
@@ -121,3 +136,27 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuración del modelo de usuario personalizado
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# ==========================================
+# CONFIGURACIÓN DE SEGURIDAD (DJANGO-AXES)
+# ==========================================
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesBackend',  # El guardián revisa primero
+    'django.contrib.auth.backends.ModelBackend', # Luego pasa al login normal
+]
+
+AXES_FAILURE_LIMIT = 5  # Bloqueo después de 5 intentos fallidos (Requisito S2)
+AXES_COOLOFF_TIME = 1   # Tiempo de bloqueo en horas
+AXES_RESET_ON_SUCCESS = True  # Reiniciar el contador si entra bien
+
+
+# ==========================================
+# CONFIGURACIÓN CSP ESTRICTA (Requisito S2)
+# ==========================================
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")  # Permite estilos básicos
+CSP_SCRIPT_SRC = ("'self'",)
+CSP_IMG_SRC = ("'self'", "data:")              # Vital para mostrar el código QR (Base64)
